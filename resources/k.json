@@ -8,6 +8,7 @@
       "evm": {
         "output": "_ => VOutput",
         "statusCode": "VStatusCode",
+	"endPC": "_ => ?_",
         "callStack": "VCallStack",
         "interimStates": "_",
         "touchedAccounts": "_ => ?_",
