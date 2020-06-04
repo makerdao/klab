@@ -48,7 +48,7 @@ kastToGasExpr kast = case node kast of
       in case kastToGasExpr arg2 of
            Value (Literal 64) -> Unary SixtyFourth e
            n -> error $ "Gas expressions should have /64 only, found: /" ++ (show n)
-    Just "#if_#then_#else_#fi" ->
+    Just "#if_#then_#else_#fi_K-EQUAL-SYNTAX" ->
       let Just [argc, arg1, arg2] = args kast
           c = formatKast argc
           e = kastToGasExpr arg1
