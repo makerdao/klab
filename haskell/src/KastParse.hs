@@ -100,7 +100,8 @@ formatKApply func fargs = let bracketed s = "( " ++ s ++ " )" in
 modules :: [String]
 modules = [ "_INT",
             "_INT-COMMON",
-            "_K-EQUAL"
+            "_K-EQUAL",
+            "_K-EQUAL-SYNTAX"
           ]
 
 stripSuffix :: (Eq a) => [a] -> [a] -> [a]

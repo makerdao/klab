@@ -86,12 +86,9 @@ do_proof () {
   name=$1
   hash=$(klab hash "$name")
 
-  if [[ $name =~ .*_pass$ ]] || [[ $name =~ .*_pass_oog$ ]] ; then
-    # do not dump _pass.k or pass_oog.k
-    PROVE_DUMP=""
-  else
-    PROVE_DUMP="--dump"
-  fi;
+  PROVE_DUMP=""
+  # only dump _pass_rough.k
+  [[ $name =~ .*_pass_rough$ ]] && PROVE_DUMP="--dump"
 
   TIMER="/usr/bin/env time --quiet -o $KLAB_OUT/meta/time/$hash"
 
