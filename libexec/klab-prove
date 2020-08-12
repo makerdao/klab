@@ -121,7 +121,7 @@ trap 'echo "Trapped SIGINT in klab-prove"  && kill $kprove_child' INT
 timeout "$TIMEOUT" "$KLAB_EVMS_PATH/deps/k/k-distribution/target/release/k/bin/kprove" \
   "${K_FLAGS[@]}" \
   --directory "$KLAB_EVMS_PATH/.build/defn/java/" \
-  --def-module RULES \
+  --def-module VERIFICATION \
   --output-omit "<jumpDests> <program> <code> <previousGas> <touchedAccounts> <interimStates> <callStack> <callData> <block> <txOrder> <txPending> <messages> #mkCall________EVM #callWithCode_________EVM #create_____EVM #mkCreate_____EVM #newAddrCreate2 #finishCodeDeposit___EVM" \
   --output-flatten "_Map_ #And" \
   --z3-impl-timeout 300 --no-exc-wrap \
