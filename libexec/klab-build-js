@@ -260,5 +260,5 @@ if(write_rules) {
 }
 
 // Implementations
-const wrapModule = (name, str) => `requires "data.k"\n\nmodule ${name}\n    imports EVM-DATA\n\n${str}\n\nendmodule`
+const wrapModule = (name, str) => `requires "data.md"\n\nmodule ${name}\n    imports EVM-DATA\n\n${str}\n\nendmodule`
 fs.writeFileSync(path.join(KLAB_OUT, "bin_runtime.k"), wrapModule("BIN_RUNTIME", bin_defs))
