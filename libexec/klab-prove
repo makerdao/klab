@@ -34,7 +34,7 @@ case $TIMEOUT in
 esac
 
 export KLAB_OUT=${KLAB_OUT:-out}
-export K_OPTS=${K_OPTS:--Xmx10G}
+export K_OPTS="${K_OPTS:--Xmx16G -Xss512m}"
 
 if [ -z "$KLAB_EVMS_PATH" ]; then
     echo "KLAB_EVMS_PATH must be set and point to evm-semantics!"

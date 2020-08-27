@@ -20,7 +20,7 @@
           "callData": "VCallData",
           "callValue": "VCallValue",
           "wordStack": "VWordStack",
-          "localMem": ".Map => ?_",
+          "localMem": ".Memory => ?_",
           "pc": "VPC",
           "gas": "VGas",
           "memoryUsed": "0 => ?_",
