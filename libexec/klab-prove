@@ -75,14 +75,15 @@ fi
 
 target_spec=${target_spec:-"$KLAB_OUT/specs/${spec_hash}.k"}
 
+K_FLAGS=()
 if $dump; then
   z3=",RULEATTEMPT,SRULEATTEMPT,IMPLICATION,Z3QUERY,Z3RESULT"
-  K_FLAGS=("$K_FLAGS" --state-log --state-log-path "$KLAB_OUT/data" --state-log-id "$spec_hash" --state-log-events "OPEN,REACHINIT,REACHTARGET,REACHPROVED,RULE,SRULE,NODE,CLOSE")
+  K_FLAGS+=(--state-log --state-log-path "$KLAB_OUT/data" --state-log-id "$spec_hash" --state-log-events "OPEN,REACHINIT,REACHTARGET,REACHPROVED,RULE,SRULE,NODE,CLOSE")
   dump_notice="(with ${yellow}state logging${reset})"
 fi
 
 if $kdebug; then
-  K_FLAGS=("$K_FLAGS" --debug --debug-z3)
+  K_FLAGS+=(--debug --debug-z3)
 fi
 
 function join_by { local IFS="$1"; shift; echo "$*"; }
