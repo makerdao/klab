@@ -45,51 +45,12 @@ const config_json   = JSON.parse(fs.readFileSync("./config.json"));
 const config        = makeConfig(config_json);
 const config_path   = config.src.specification;
 const spec_name     = process.argv[2];
-const timeouts      = config.timeouts || {}
-const memory        = config.memory || {}
 const raw_md_config = Array.isArray(config_path) && config_path.map(p => read(p)).join("\n\n") || read(config_path)
 
-// RULES
-var {rules_str} = makeRules(config);
-// prelude
-const {prelude_str, write_prelude} = makePrelude(config);
-// TODO error when not set
-const KLAB_EVMS_PATH = process.env.KLAB_EVMS_PATH || path.join(__dirname, '..', 'evm-semantics');
-if ('evm-semantics' !== KLAB_EVMS_PATH.match(/([^\/]*)\/*$/)[1]) {
-  throw new Error(`Wrong EVMS path: ${KLAB_EVMS_PATH}`);
-}
-const EVM_SEMANTICS_VERSION = execSync(`git rev-parse HEAD`, {
-  cwd: KLAB_EVMS_PATH,
-  encoding: 'utf8'
-});
-
-const bin_defs = Object.keys(config.implementations)
-  .map(alias => {
-    const name = config.implementations[alias].name;
-    const c = config.contracts[name];
-    const bin = c.bin;
-    const bin_runtime = c.bin_runtime;
-    const binDef  = `syntax WordStack ::= "${alias}_bin"`;
-    const binRule = `rule ${alias}_bin => #parseByteStack("0x${bin}") [macro]\n`;
-    const runtimeDef  = `syntax WordStack ::= "${alias}_bin_runtime"`;
-    const runtimeRule = `rule ${alias}_bin_runtime => #parseByteStack("0x${bin_runtime}") [macro]`;
-    return [binDef, binRule, runtimeDef, runtimeRule].join("\n")
-  }).join('\n\n')
-
 config.get_proof_hash = ({name, spec}) => {
-  let proof = {
-    bin_defs,
-    evms: EVM_SEMANTICS_VERSION,
-    klab: getKlabHEAD(),
-    rules: rules_str,
-    smt_prelude: prelude_str,
-    spec : spec,
-    timeout: timeouts[name] || null
-  }
-  if (memory[name]) proof.memory = memory[name];
+  let proof = { spec : spec }
   return sha3(JSON.stringify(proof))
 }
-
 
 // 1. get acts
 //    return a [behaviour]
@@ -114,7 +75,6 @@ const parsed_tokens = tokens
       return t;
     }
   });
-
 
 const act_collection = parsed_tokens
   .filter(e => e.type === "code" && e.lang == "act")
