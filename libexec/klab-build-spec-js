@@ -131,6 +131,8 @@ if (spec_name.endsWith('__exhaustiveness')) {
   const name = alias + "__exhaustiveness";
   const {id, module, status} = makeInterabiExhaustiveness(alias, cname, config.contracts[cname], config.get_proof_hash)
 
+  fs.writeFileSync(path.join(KLAB_OUT, "specs", `${id}.k`), module)
+
   fs.writeFileSync(path.join(KLAB_OUT, "meta", "name", name), id);
   // hash -> data
   fs.writeFileSync(path.join(KLAB_OUT, "meta", "data", id), JSON.stringify({
@@ -141,23 +143,12 @@ if (spec_name.endsWith('__exhaustiveness')) {
     implementations: config.implementations
   }));
 
-  fs.writeFileSync(path.join(KLAB_OUT, "specs", `${id}.k`), module)
-
-  if(status == "????") {
-    console.log(id, name);
-  }
+  console.log(id, name);
 } else if (spec_name in build_proofs) {
-    const rule = act_proofs[spec_name];
-    // let _rules      = [rule.spec].concat(rule.ctx.spec)
-    // let module      = kjson.renderModule(_rules, rule.name)
+    const rule        = act_proofs[spec_name];
     const module_path = path.join(KLAB_OUT, "specs", `${rule.hash}.k`)
 
-    var old_module  = "";
-    if(testPath(module_path)) old_module = read(module_path);
-    if(old_module != rule.module) {
-      console.log(rule.hash + " " + rule.name + rule.ctx.map(r => "\n - " + r.name));
-      fs.writeFileSync(module_path, rule.module);
-    }
+    fs.writeFileSync(module_path, rule.module);
 
     // METADATA
     // name -> hash
@@ -172,6 +163,8 @@ if (spec_name.endsWith('__exhaustiveness')) {
       contracts: config.contracts,
       implementations: config.implementations
     }));
+
+    console.log(rule.hash + " " + rule.name + rule.ctx.map(r => "\n - " + r.name));
 } else {
   throw new Error('No such spec: ' + spec_name);
 }
