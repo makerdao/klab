@@ -80,6 +80,7 @@ const act_collection = parsed_tokens
   .filter(e => e.type === "code" && e.lang == "act")
   .map(e => e.cases)
   .reduce((a, cs) => a.concat(cs), [])
+  .filter(a => a.name == spec_name)
 
 const act_proofs = proofCollection(config)(act_collection)
 const build_proofs = buildActs(config, act_proofs);
