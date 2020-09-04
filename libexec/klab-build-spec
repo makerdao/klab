@@ -3,20 +3,11 @@
 const fs            = require("fs");
 const path          = require("path");
 const marked        = require("marked");
-const {docopt}      = require("docopt");
-const clc           = require("cli-color");
 const _             = require("lodash");
-const kjson         = require("../lib/kjson.js");
-const kast          = require("../lib/kast.js");
-const { execSync }  = require('child_process');
 const makeConfig    = require("../lib/config.js");
 const {
   proofCollection,
-  makePrelude,
-  makeRules,
-  getActs,
   parseAct,
-  buildAct,
   buildActs,
   caseSplitAct,
   newCleanup,
@@ -24,7 +15,6 @@ const {
 }                   = require("../lib/build.js");
 const {
   ensureDirs,
-  getKlabHEAD,
   read,
   revert,
   sha3,
