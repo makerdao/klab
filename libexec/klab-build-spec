@@ -51,7 +51,7 @@ config.get_proof_hash = ({name, spec}) => {
 const tokens        = marked.lexer(raw_md_config)
 const parsed_tokens = tokens
   .map(t => {
-    if(t.type == 'code' && t.lang === "act") {
+    if(t.type === 'code' && t.lang === "act") {
       const parsedAct = parseAct(config)(t.text, true);
       const cases = caseSplitAct(config)(parsedAct);
       return {
@@ -67,7 +67,7 @@ const parsed_tokens = tokens
   });
 
 const act_collection = parsed_tokens
-  .filter(e => e.type === "code" && e.lang == "act")
+  .filter(e => e.type === "code" && e.lang === "act")
   .map(e => e.cases)
   .reduce((a, cs) => a.concat(cs), [])
 
