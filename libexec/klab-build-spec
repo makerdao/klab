@@ -1,0 +1,120 @@
+#!/usr/bin/env node
+
+const fs            = require("fs");
+const path          = require("path");
+const marked        = require("marked");
+const _             = require("lodash");
+const makeConfig    = require("../lib/config.js");
+const {
+  proofCollection,
+  parseAct,
+  buildActs,
+  caseSplitAct,
+  newCleanup,
+  makeInterabiExhaustiveness
+}                   = require("../lib/build.js");
+const {
+  ensureDirs,
+  read,
+  revert,
+  sha3,
+  testPath,
+  warn,
+}                   = require("../lib/util.js");
+const __a2n = act => act.subject + "_" + act.name;
+
+const KLAB_OUT = process.env.KLAB_OUT || "out";
+
+const usage = `
+Usage:
+  klab build-spec [<spec-name>]
+`
+
+if (!testPath("./config.json")) {revert("No config.json file in directory. Review `klab/examples` folder for inspiration")}
+const config_json   = JSON.parse(fs.readFileSync("./config.json"));
+const config        = makeConfig(config_json);
+const config_path   = config.src.specification;
+const spec_name     = process.argv[2];
+const raw_md_config = Array.isArray(config_path) && config_path.map(p => read(p)).join("\n\n") || read(config_path)
+
+config.get_proof_hash = ({name, spec}) => {
+  let proof = { spec : spec }
+  return sha3(JSON.stringify(proof))
+}
+
+// 1. get acts
+//    return a [behaviour]
+// 2. parse acts
+//    parses every behaviour into a structured object
+// 3. build acts
+
+const tokens        = marked.lexer(raw_md_config)
+const parsed_tokens = tokens
+  .map(t => {
+    if(t.type === 'code' && t.lang === "act") {
+      const parsedAct = parseAct(config)(t.text, true);
+      const cases = caseSplitAct(config)(parsedAct);
+      return {
+        type: 'code',
+        lang: "act",
+        obj: parsedAct,
+        cases: cases,
+        text: newCleanup(parsedAct, t.text)
+      };
+    } else {
+      return t;
+    }
+  });
+
+const act_collection = parsed_tokens
+  .filter(e => e.type === "code" && e.lang === "act")
+  .map(e => e.cases)
+  .reduce((a, cs) => a.concat(cs), [])
+
+const act_proofs = proofCollection(config)(act_collection)
+const build_proofs = buildActs(config, act_proofs);
+
+// write module
+if (spec_name.endsWith('__exhaustiveness')) {
+  alias = spec_name.split('_')[0]
+  const cname = config.implementations[alias].name
+  const name = alias + "__exhaustiveness";
+  const {id, module, status} = makeInterabiExhaustiveness(alias, cname, config.contracts[cname], config.get_proof_hash)
+
+  fs.writeFileSync(path.join(KLAB_OUT, "specs", `${id}.k`), module)
+
+  fs.writeFileSync(path.join(KLAB_OUT, "meta", "name", name), id);
+  // hash -> data
+  fs.writeFileSync(path.join(KLAB_OUT, "meta", "data", id), JSON.stringify({
+    name,
+    src: config.src,
+    srcs: config.srcs,
+    contracts: config.contracts,
+    implementations: config.implementations
+  }));
+
+  console.log(id, name);
+} else if (spec_name in build_proofs) {
+    const rule        = act_proofs[spec_name];
+    const module_path = path.join(KLAB_OUT, "specs", `${rule.hash}.k`)
+
+    fs.writeFileSync(module_path, rule.module);
+
+    // METADATA
+    // name -> hash
+    fs.writeFileSync(path.join(KLAB_OUT, "meta", "name", rule.name), rule.hash);
+    // hash -> data
+    fs.writeFileSync(path.join(KLAB_OUT, "meta", "data", rule.hash), JSON.stringify({
+      v2n: rule.v2n,
+      act: rule.act_name,
+      name: rule.name,
+      src: config.src,
+      srcs: config.srcs,
+      contracts: config.contracts,
+      implementations: config.implementations
+    }));
+
+    console.log(rule.hash + " " + rule.name + rule.ctx.map(r => "\n - " + r.name));
+} else {
+  throw new Error('No such spec: ' + spec_name);
+}
