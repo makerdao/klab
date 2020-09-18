@@ -90,6 +90,8 @@ for (var dep_name in dependencies) {
 }
 output_makefile.push('$(KLAB_OUT_LOCAL)/accept/%__exhaustiveness: $(KLAB_OUT_LOCAL)/built/%__exhaustiveness')
 output_makefile.push('\t$(PROVE) $*__exhaustiveness')
+output_makefile.push('\t@mkdir -p $(dir $@)')
+output_makefile.push('\t@touch $@')
 output_makefile.push('')
 output_makefile.push('$(KLAB_OUT_LOCAL)/accept/%_pass_rough: $(KLAB_OUT_LOCAL)/built/%_pass_rough')
 output_makefile.push('\t$(PROVE_DUMP) $*_pass_rough')
