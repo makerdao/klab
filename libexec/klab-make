@@ -64,21 +64,30 @@ const dependencies = Object.assign({},
   .map((a) => ({ [a.name]: (a.act.calls || []).map(d => d.replace('.', '_') + '_pass') })))
 
 output_makefile = []
-top_level = [...exhaustiveness]
+fail_rough = []
+pass_rough = []
+pass = []
 for (var dep_name in dependencies) {
   let dep_name_without_rough = dep_name.substring(0, dep_name.length - 6)
   let dep_subtargets         = dependencies[dep_name]
-  let isPass                 = dep_name.endsWith('_pass_rough')
-  let target_string    = isPass ? 'prove-dump' : 'prove'
+  let isPass                 = dep_name.endsWith('_pass_rough') || dep_name.endsWith('_pass')
+  let isRough                = dep_name.endsWith('_rough')
+  let target_string    = (isPass && isRough) ? 'prove-dump' : 'prove'
   let subtarget_string = dep_subtargets.map(d => d + '.prove').join(' ')
-  let prove_string     = isPass ? 'PROVE_DUMP' : 'PROVE'
+  let prove_string     = (isPass && isRough) ? 'PROVE_DUMP' : 'PROVE'
   output_makefile.push(dep_name + '.' + target_string + ': ' + dep_name + '.build')
   output_makefile.push('\t$(' + prove_string + ') ' + dep_name)
   output_makefile.push('')
   output_makefile.push(dep_name + '.build: mkdirs ' + subtarget_string)
   output_makefile.push('\t$(BUILD) ' + dep_name)
   output_makefile.push('')
-  top_level.push((isPass ? dep_name_without_rough : dep_name) + '.prove')
+  if (isPass && isRough) {
+    pass_rough.push(dep_name)
+  } else if (isPass) {
+    pass.push(dep_name)
+  } else {
+    fail_rough.push(dep_name)
+  }
 }
 output_makefile.push('mkdirs:')
 output_makefile.push('\t@mkdir -p $(OUT_DIR)/specs')
@@ -103,7 +112,15 @@ output_makefile.push('')
 output_makefile.push('%__exhaustiveness.build: mkdirs')
 output_makefile.push('\t$(BUILD) $*__exhaustiveness')
 output_makefile.push('')
-output_makefile.push('prove: ' + top_level.join(' \\\n       '))
+output_makefile.push('exhaustiveness_specs := ' + exhaustiveness.join(' \\\n                        '))
+output_makefile.push('')
+output_makefile.push('pass_rough_specs     := ' + pass_rough.join(' \\\n                        '))
+output_makefile.push('')
+output_makefile.push('pass_specs           := ' + pass.join(' \\\n                        '))
+output_makefile.push('')
+output_makefile.push('fail_rough_specs     := ' + fail_rough.join(' \\\n                        '))
+output_makefile.push('')
+output_makefile.push('prove: $(exhaustiveness_specs:=.prove)\\\n       $(pass_rough_specs:=.prove-dump)\\\n       $(pass_specs:=.prove)\\\n       $(fail_rough_specs:=.prove)')
 output_makefile.push('')
 
 console.log(output_makefile.join('\n'))
