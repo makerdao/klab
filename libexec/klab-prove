@@ -11,7 +11,6 @@ reset=$(tput sgr0)
 dump=false
 kdebug=false
 logs=false
-TIMEOUT=1d
 args=()
 while [[ "$#" -gt '0' ]]; do
     arg="$1"
@@ -19,18 +18,10 @@ while [[ "$#" -gt '0' ]]; do
         --dump|-d ) dump=true    ; shift   ;;
         --kdebug  ) kdebug=true  ; shift   ;;
         --logs    ) logs=true    ; shift   ;;
-        --timeout ) TIMEOUT=$2   ; shift 2 ;;
         *         ) args+=("$1") ; shift   ;;
     esac
 done
 set "${args[@]}"
-
-case $TIMEOUT in
-  *d) TIMEOUT=$(bc <<< "${TIMEOUT%d} * 86400 / 1") ;;
-  *h) TIMEOUT=$(bc <<< "${TIMEOUT%h} * 3600  / 1") ;;
-  *m) TIMEOUT=$(bc <<< "${TIMEOUT%m} * 60    / 1") ;;
-  *s) TIMEOUT=$(bc <<< "${TIMEOUT%s}         / 1") ;;
-esac
 
 export KLAB_OUT=${KLAB_OUT:-out}
 export K_OPTS="${K_OPTS:--Xmx16G -Xss512m}"
@@ -117,10 +108,9 @@ info="$(basename "$target_spec") [$spec_name] $dump_notice"
 mkdir -p "$KLAB_OUT/started" && echo "$result" > "$KLAB_OUT/started/$spec_hash"
 echo "${blue}Proof ${bold}STARTING${reset}: $info"
 set +e
-ulimit -St $TIMEOUT
 trap 'echo "Trapped SIGTERM in klab-prove" && kill $kprove_child' TERM
 trap 'echo "Trapped SIGINT in klab-prove"  && kill $kprove_child' INT
-timeout "$TIMEOUT" "$KLAB_EVMS_PATH/deps/k/k-distribution/target/release/k/bin/kprove" \
+"$KLAB_EVMS_PATH/deps/k/k-distribution/target/release/k/bin/kprove" \
   "${K_FLAGS[@]}" \
   --directory "$KLAB_EVMS_PATH/.build/defn/java/" \
   --def-module VERIFICATION \
@@ -144,12 +134,6 @@ set -e
 if [ $result -eq 0 ]; then
   mkdir -p "$KLAB_OUT/accept" && echo "$result" > "$KLAB_OUT/accept/$spec_hash"
   echo "${green}Proof ${bold}ACCEPT${reset}: $info"
-elif [ $result -eq 152 ]; then
-  # ulimit timeout kills with SIGXCPU (152)
-  mkdir -p "$KLAB_OUT/timeout" && echo "$result" > "$KLAB_OUT/timeout/$spec_hash"
-  echo "${red}Proof ${bold}TIMEOUT${reset}: $info"
-  # use 124 to mimic gnu timeout
-  result=124
 elif [ $result -gt 127 ]; then
   # results > 127 are 128 + signal number
   mkdir -p "$KLAB_OUT/aborted" && echo "$(($result%128))" > "$KLAB_OUT/aborted/$spec_hash"
