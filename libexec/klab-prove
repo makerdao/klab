@@ -21,7 +21,7 @@ while [[ "$#" -gt '0' ]]; do
         *         ) args+=("$1") ; shift   ;;
     esac
 done
-set "${args[@]}"
+set -- "${args[@]}"
 
 export KLAB_OUT=${KLAB_OUT:-out}
 export K_OPTS="${K_OPTS:--Xmx16G -Xss512m}"
