@@ -12,19 +12,18 @@ dump=false
 kdebug=false
 logs=false
 TIMEOUT=1d
-usage() { echo "Usage: klab prove [-d|--dump] [--logs] [--timeout=<timeout>] [--kdebug] [<spec>]" 1>&2; exit 1; }
-OPTS=$(getopt --name="$0" --options=d --longoptions="dump, kdebug,logs,timeout:" -- "$@") || usage
-eval set -- "$OPTS"
-while true; do
-  case "$1" in
-    --dump|-d) dump=true;  shift   ;;
-    --kdebug)   kdebug=true;  shift   ;;
-    --logs)    logs=true;  shift   ;;
-    --timeout) TIMEOUT=$2; shift 2 ;;
-    --) shift; break ;;
-    *) usage ;;
-  esac
+args=()
+while [[ "$#" -gt '0' ]]; do
+    arg="$1"
+    case "$arg" in
+        --dump|-d ) dump=true    ; shift   ;;
+        --kdebug  ) kdebug=true  ; shift   ;;
+        --logs    ) logs=true    ; shift   ;;
+        --timeout ) TIMEOUT=$2   ; shift 2 ;;
+        *         ) args+=("$1") ; shift   ;;
+    esac
 done
+set "${args[@]}"
 
 case $TIMEOUT in
   *d) TIMEOUT=$(bc <<< "${TIMEOUT%d} * 86400 / 1") ;;
@@ -135,6 +134,7 @@ timeout "$TIMEOUT" "$KLAB_EVMS_PATH/deps/k/k-distribution/target/release/k/bin/k
   --boundary-cells k,pc \
   --concrete-rules "$(join_by , ${concrete_rules[@]})" \
   --z3-tactic "(or-else (using-params smt :random-seed 3) (using-params smt :random-seed 2) (using-params smt :random-seed 1))" \
+  "$@" \
   "$target_spec" >"$STDOUT" 2>"$STDERR" & kprove_child=$!
 wait "$kprove_child"
 result=$?
