@@ -38,11 +38,21 @@ const {
 const {pruned_edges, initt, finished} = prune_edges(proofid, false);
 
 const if_else_fi = args => ({
-  node: "KApply",
-  label: "#if_#then_#else_#fi_K-EQUAL",
-  variable: false,
-  arity: 3,
-  args: args
+  if (args[1].label == 'infGas' && args[2].label == 'infGas') {
+    return { node: "KApply"
+           , label: "infGas"
+           , variable: false,
+           , arity: 1,
+           , args: [if_else_fi([args[0], args[1].args[0], args[2].args[0])]
+           }
+  } else {
+    return { node: "KApply"
+           , label: "#if_#then_#else_#fi_K-EQUAL"
+           , variable: false
+           , arity: 3
+           , args: args
+           }
+  }
 })
 const and = args => ({
   node: "KApply",
