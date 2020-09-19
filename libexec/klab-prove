@@ -76,34 +76,6 @@ if $kdebug; then
   K_FLAGS+=(--debug --debug-z3)
 fi
 
-function join_by { local IFS="$1"; shift; echo "$*"; }
-concrete_rules=(
-  EDSL.#ceil32
-  EDSL.keccakIntList
-  EVM.#memoryUsageUpdate.some
-  EVM-TYPES.#asByteStack
-  EVM-TYPES.#asByteStackAux.recursive
-  EVM-TYPES.#asWord.recursive
-  EVM-TYPES.ByteArray.range
-  EVM-TYPES.divSWord
-  EVM-TYPES.mapWriteBytes.recursive
-  EVM-TYPES.#padToWidth
-  EVM-TYPES.powmod.nonzero
-  EVM-TYPES.powmod.zero
-  EVM-TYPES.#range
-  EVM-TYPES.#rangeAux.rec
-  EVM-TYPES.#signed.negative
-  EVM-TYPES.#signed.positive
-  EVM-TYPES.signextend.invalid
-  EVM-TYPES.signextend.negative
-  EVM-TYPES.signextend.positive
-  EVM-TYPES.#unsigned.negative
-  EVM-TYPES.#unsigned.positive
-  SERIALIZATION.keccak
-  SERIALIZATION.#newAddr
-  SERIALIZATION.#newAddrCreate2
-)
-
 info="$(basename "$target_spec") [$spec_name] $dump_notice"
 mkdir -p "$KLAB_OUT/started" && echo "$result" > "$KLAB_OUT/started/$spec_hash"
 echo "${blue}Proof ${bold}STARTING${reset}: $info"
@@ -122,7 +94,6 @@ trap 'echo "Trapped SIGINT in klab-prove"  && kill $kprove_child' INT
   --no-sort-collections \
   --output json \
   --boundary-cells k,pc \
-  --concrete-rules "$(join_by , ${concrete_rules[@]})" \
   --z3-tactic "(or-else (using-params smt :random-seed 3) (using-params smt :random-seed 2) (using-params smt :random-seed 1))" \
   "$@" \
   "$target_spec" >"$STDOUT" 2>"$STDERR" & kprove_child=$!
