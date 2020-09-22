@@ -38,9 +38,9 @@ const {
 const {pruned_edges, initt, finished} = prune_edges(proofid, false);
 
 const if_else_fi = args => {
-  if (args[1].label == 'infGas' && args[2].label == 'infGas') {
+  if (args[1].label == args[2].label && args[1].args.length == args[2].args.length && args[1].args.length == 1) {
     return { node: "KApply"
-           , label: "infGas"
+           , label: args[1].label
            , variable: false
            , arity: 1
            , args: [if_else_fi([args[0], args[1].args[0], args[2].args[0]])]
