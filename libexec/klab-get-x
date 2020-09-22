@@ -47,7 +47,7 @@ const if_else_fi = args => {
            }
   } else {
     return { node: "KApply"
-           , label: "#if_#then_#else_#fi_K-EQUAL"
+           , label: "#if_#then_#else_#fi_K-EQUAL-SYNTAX"
            , variable: false
            , arity: 3
            , args: args
