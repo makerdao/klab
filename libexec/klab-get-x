@@ -45,6 +45,8 @@ const if_else_fi = args => {
            , arity: 1
            , args: [if_else_fi([args[0], args[1].args[0], args[2].args[0]])]
            }
+  } else if (args[1] == args[2]) {
+    return args[1];
   } else {
     return { node: "KApply"
            , label: "#if_#then_#else_#fi_K-EQUAL-SYNTAX"
