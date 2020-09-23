@@ -135,9 +135,10 @@ output_makefile.push('all_specs            := $(exhaustiveness_specs) $(pass_rou
 output_makefile.push('')
 output_makefile.push('prove: $(patsubst %, $(KLAB_OUT_LOCAL)/accept/%, $(all_specs))')
 output_makefile.push('')
-output_makefile.push('.SECONDARY: $(patsubst %, $(KLAB_OUT_LOCAL)/built/%, $(all_specs))  \\')
-output_makefile.push('            $(patsubst %, $(KLAB_OUT_LOCAL)/accept/%, $(all_specs)) \\')
-output_makefile.push('            $(patsubst %, $(KLAB_OUT_LOCAL)/gas/%, $(all_specs))')
+output_makefile.push('.SECONDARY: $(patsubst %, $(KLAB_OUT_LOCAL)/built/%, $(all_specs))   \\')
+output_makefile.push('            $(patsubst %, $(KLAB_OUT_LOCAL)/accept/%, $(all_specs))  \\')
+output_makefile.push('            $(patsubst %, $(KLAB_OUT_LOCAL)/gas/%, $(all_specs))     \\')
+output_makefile.push('            $(patsubst %, $(KLAB_OUT_LOCAL)/gas/%.raw, $(all_specs))'   )
 output_makefile.push('')
 
 console.log(output_makefile.join('\n'))
