@@ -63,6 +63,20 @@ const and = args => ({
   arity: 2,
   args: args
 })
+const KEq = args => ({
+  node: "KApply",
+  label: "_==K_",
+  variable: false,
+  arity: 2,
+  args: args
+})
+const KAnd = args => ({
+  node: "KApply",
+  label: "#And",
+  variable: false,
+  arity: args.length,
+  args: args
+})
 
 const minus = args => ({
   node: "KApply",
@@ -140,7 +154,19 @@ const traverse = (firstNode) => {
     c = E[c][0].to;
   }
   if (!(c in E) || E[c].length == 0) {
-    return kast.get(blob(c.split('_')[0]).term, kpath)
+    let gasExps = [kast.get(blob(c.split('_')[0]).term, kpath)];
+    constraint = blob(c.split('_')[1]).term;
+    for (i in constraint.args) {
+      cstraint = constraint.args[i];
+      if (cstraint.label == '_==K_') {
+        if (cstraint.args[0].node == 'KApply' && cstraint.args[0].label == '#lookup') {
+          gasExps.push(KEq([cstraint.args[0], cstraint.args[1]]));
+        } else if (cstraint.args[1].node == 'KApply' && cstraint.args[1].label == '#lookup') {
+          gasExps.push(KEq([cstraint.args[1], cstraint.args[0]]));
+        }
+      }
+    }
+    return KAnd(gasExps);
   } else {
     const l = traverse(E[c][0].to);
 //    console.log('l: '+ l)
