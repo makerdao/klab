@@ -37,25 +37,13 @@ const {
 
 const {pruned_edges, initt, finished} = prune_edges(proofid, false);
 
-const if_else_fi = args => {
-  if (args[1].label == args[2].label && args[1].args.length == args[2].args.length && args[1].args.length == 1) {
-    return { node: "KApply"
-           , label: args[1].label
-           , variable: false
-           , arity: 1
-           , args: [if_else_fi([args[0], args[1].args[0], args[2].args[0]])]
-           }
-  } else if (args[1] == args[2]) {
-    return args[1];
-  } else {
-    return { node: "KApply"
-           , label: "#if_#then_#else_#fi_K-EQUAL-SYNTAX"
-           , variable: false
-           , arity: 3
-           , args: args
-           }
-  }
-}
+const if_else_fi = args => ({
+    { node: "KApply"
+    , label: "#if_#then_#else_#fi_K-EQUAL-SYNTAX"
+    , variable: false
+    , arity: 3
+    , args: args
+    })
 const and = args => ({
   node: "KApply",
   label: "_andBool_",
@@ -70,13 +58,25 @@ const KEq = args => ({
   arity: 2,
   args: args
 })
-const KAnd = args => ({
-  node: "KApply",
-  label: "#And",
-  variable: false,
-  arity: args.length,
-  args: args
-})
+const KAnd = args => {
+  if (args.length == 0) {
+    return { node: "KApply"
+           , label: "#Top"
+           , variable: false
+           , arity: 0
+           , args: []
+           }
+  } else if (args.length == 1) {
+    return args[0]
+  } else {
+    return { node: "KApply"
+           , label: "#And"
+           , variable: false
+           , arity: 2
+           , args: [args[0], KAnd(args.slice(1))]
+           }
+  }
+}
 
 const minus = args => ({
   node: "KApply",
