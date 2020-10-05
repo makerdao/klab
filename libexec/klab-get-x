@@ -37,13 +37,12 @@ const {
 
 const {pruned_edges, initt, finished} = prune_edges(proofid, false);
 
-const if_else_fi = args => ({
-    { node: "KApply"
-    , label: "#if_#then_#else_#fi_K-EQUAL-SYNTAX"
-    , variable: false
-    , arity: 3
-    , args: args
-    })
+const if_else_fi = args => ({ node: "KApply"
+                            , label: "#if_#then_#else_#fi_K-EQUAL-SYNTAX"
+                            , variable: false
+                            , arity: 3
+                            , args: args
+                            })
 const and = args => ({
   node: "KApply",
   label: "_andBool_",
