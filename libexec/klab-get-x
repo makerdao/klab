@@ -156,14 +156,7 @@ const traverse = (firstNode) => {
     let gasExps = [kast.get(blob(c.split('_')[0]).term, kpath)];
     constraint = blob(c.split('_')[1]).term;
     for (i in constraint.args) {
-      cstraint = constraint.args[i];
-      if (cstraint.label == '_==K_') {
-        if (cstraint.args[0].node == 'KApply' && cstraint.args[0].label == '#lookup') {
-          gasExps.push(KEq([cstraint.args[0], cstraint.args[1]]));
-        } else if (cstraint.args[1].node == 'KApply' && cstraint.args[1].label == '#lookup') {
-          gasExps.push(KEq([cstraint.args[1], cstraint.args[0]]));
-        }
-      }
+      gasExps.push(constraint.args[i]);
     }
     return KAnd(gasExps);
   } else {
