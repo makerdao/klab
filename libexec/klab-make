@@ -69,10 +69,10 @@ fail_rough = []
 pass_rough = []
 pass = []
 for (var dep_name in dependencies) {
-  let dep_name_without_rough = dep_name.substring(0, dep_name.length - 6)
+  let isRough                = dep_name.endsWith('_rough')
+  let dep_name_without_rough = isRough ? dep_name.substring(0, dep_name.length - 6) : dep_name
   let dep_subtargets         = dependencies[dep_name]
   let isPass                 = dep_name.endsWith('_pass_rough') || dep_name.endsWith('_pass')
-  let isRough                = dep_name.endsWith('_rough')
   let subtarget_string       = dep_subtargets.map(d => '$(KLAB_OUT_LOCAL)/accept/' + d).join(' ')
   output_makefile.push('$(KLAB_OUT_LOCAL)/built/' + dep_name + ': ' + subtarget_string + ' $(SPEC_SRCS)')
   output_makefile.push('\t$(BUILD) ' + dep_name)
