@@ -76,6 +76,25 @@ const KAnd = args => {
            }
   }
 }
+const KOr = args => {
+  if (args.length == 0) {
+    return { node: "KApply"
+           , label: "#Bottom"
+           , variable: false
+           , arity: 0
+           , args: []
+           }
+  } else if (args.length == 1) {
+    return args[0]
+  } else {
+    return { node: "KApply"
+           , label: "#Or"
+           , variable: false
+           , arity: 2
+           , args: [args[0], KOr(args.slice(1))]
+           }
+  }
+}
 
 const minus = args => ({
   node: "KApply",
@@ -164,21 +183,22 @@ const traverse = (firstNode) => {
 //    console.log('l: '+ l)
     const r = traverse(E[c][1].to);
 //    console.log('r: '+ r)
-    if(l.label && l.label == "#if_#then_#else_#fi_K-EQUAL" && JSON.stringify(l.args[2]) == JSON.stringify(r)) {
-      return if_else_fi([
-        and([
-          deltaCC(blob(E[c][0].from.split('_')[1]), blob(E[c][0].to.split('_')[1]))[0],
-          l.args[0]
-        ]),
-        l.args[1],
-        r
-      ])
-    }
-    return JSON.stringify(l) == JSON.stringify(r)
-      ? r
-      : if_else_fi([
-        deltaCC(blob(E[c][0].from.split('_')[1]), blob(E[c][0].to.split('_')[1]))[0], l, r
-      ])
+    return KOr([l, r]);
+//    if(l.label && l.label == "#if_#then_#else_#fi_K-EQUAL" && JSON.stringify(l.args[2]) == JSON.stringify(r)) {
+//      return if_else_fi([
+//        and([
+//          deltaCC(blob(E[c][0].from.split('_')[1]), blob(E[c][0].to.split('_')[1]))[0],
+//          l.args[0]
+//        ]),
+//        l.args[1],
+//        r
+//      ])
+//    }
+//    return JSON.stringify(l) == JSON.stringify(r)
+//      ? r
+//      : if_else_fi([
+//        deltaCC(blob(E[c][0].from.split('_')[1]), blob(E[c][0].to.split('_')[1]))[0], l, r
+//      ])
   }
 }
 
