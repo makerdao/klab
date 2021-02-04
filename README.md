@@ -59,87 +59,6 @@ KLab no longer handles setting up KEVM for you.
 Follow the [Instructions for KEVM](https://github.com/kframework/evm-semantics) to setup KEVM, in particular you need to build the Java backend (`make build-java`).
 Make sure that you setup the environment variable `KLAB_EVMS_PATH` to point to the absolute path of the KEVM repository root.
 
-Usage
------
-
-To see how klab is used, we can explore the project in `examples/SafeAdd`:
-
-```sh
-cd examples/SafeAdd/
-```
-
-### Specification
-
-The file `config.json` tells klab where to look for both the specification and the implementation of our contract. In this case, our specification lives in `src/`, and our implementation lives in `dapp/`.
-
-Note that this example includes `dapp/out/SafeAdd.sol.json` compiled from the solidity source. With [solc](https://solidity.readthedocs.io/en/latest/installing-solidity.html) installed, you can compile it yourself:
-
-```sh
-solc --combined-json=abi,bin,bin-runtime,srcmap,srcmap-runtime,ast dapp/src/SafeAdd.sol > dapp/out/SafeAdd.sol.json
-```
-
-### Proof
-
-Our goal is to prove that our implementation satisfies our specification. To do so, we'll start by building a set of K modules from our spec:
-
-```sh
-klab build
-```
-
-This will generate success and failure reachability rules for each `act` of our specification. We can find the results in the `out/specs` directory.
-
-Now we're ready to prove each case, for example:
-
-```sh
-klab prove --dump SafeAdd_add_fail
-```
-
-The `--dump` flag outputs a log to `out/data/<hash>.log`, which will be needed later for interactive debugging. We can also do `klab prove-all` to prove all outstanding claims.
-
-Once the proof is complete, we can explore the generated symbolic execution trace using:
-
-```sh
-klab debug <hash>
-```
-
-### Key Bindings
-
-Toggle different views by pressing any of the following keys:
-
-**View Commands**:
-
--   `t` - display the (somewhat) pretty K **t**erm.
--   `c` - display current **c**onstraints.
--   `k` - display `<k>` cell.
--   `b` - display **b**ehavior tree.
--   `s` - diaplay **s**ource code.
--   `e` - display **e**vm specific module.
--   `m` - display **m**emory cell.
--   `d` - display **d**ebug cells (see toggling debug cells below).
--   `r` - display applied K **r**ule.
--   `z` - display **z**3 feedback from attempted rule application.
--   `Up/Dn` - scroll view **up** and **down**.
-
-**Navigation Commands**:
-
--   `n`       - step to **n**ext opcode
--   `p`       - step to **p**revious opcode
--   `Shift+n` - step to **n**ext k term
--   `Shift+p` - step to **p**revious k term
--   `Ctrl+n`  - step to **n**ext branch point
--   `Ctrl+p`  - step to **p**revious branch point
-
-**Toggling Debug Cells**:
-
-The following commands are prefixed with `:` (and are typed at the bottom of the interface).
-It's possible to toggle the debug cells view for specific cells, which prints out the JSON representation of the given cells.
-Remember, you must turn on the **d**ebug cells view to see these (above).
-
--   `:show ethereum.evm.callState.gas` - show the contents of the `<gas>` cell in the **d**ebug cells view.
--   `:hide ethereum.evm.callStack.pc`  - hide the contents of the `<pc>` cell in the **d**ebug cells view.
--   `:omit   gas pc` - omit the contents of the `<gas>` and `<pc>` cells in the **t**erm view.
--   `:unomit pc programBytes`  - unomit the contents of the `<pc>` and `<programBytes>` cells in the **t**erm view.
-
 ### Available klab Commands
 
 -   `klab build` - builds a set of K reachability claims in `out/specs` based on the spec, lemmas and source code as specified in the projects `config.json`.
@@ -188,6 +107,89 @@ Here's an example:
   "solc_output_path": "out/dapp.sol.json",
   "host": "127.0.0.1:8080"
 }
+```
+
+### Key Bindings
+
+Toggle different views by pressing any of the following keys:
+
+**View Commands**:
+
+-   `t` - display the (somewhat) pretty K **t**erm.
+-   `c` - display current **c**onstraints.
+-   `k` - display `<k>` cell.
+-   `b` - display **b**ehavior tree.
+-   `s` - diaplay **s**ource code.
+-   `e` - display **e**vm specific module.
+-   `m` - display **m**emory cell.
+-   `d` - display **d**ebug cells (see toggling debug cells below).
+-   `r` - display applied K **r**ule.
+-   `z` - display **z**3 feedback from attempted rule application.
+-   `Up/Dn` - scroll view **up** and **down**.
+
+**Navigation Commands**:
+
+-   `n`       - step to **n**ext opcode
+-   `p`       - step to **p**revious opcode
+-   `Shift+n` - step to **n**ext k term
+-   `Shift+p` - step to **p**revious k term
+-   `Ctrl+n`  - step to **n**ext branch point
+-   `Ctrl+p`  - step to **p**revious branch point
+
+**Toggling Debug Cells**:
+
+The following commands are prefixed with `:` (and are typed at the bottom of the interface).
+It's possible to toggle the debug cells view for specific cells, which prints out the JSON representation of the given cells.
+Remember, you must turn on the **d**ebug cells view to see these (above).
+
+-   `:show ethereum.evm.callState.gas` - show the contents of the `<gas>` cell in the **d**ebug cells view.
+-   `:hide ethereum.evm.callStack.pc`  - hide the contents of the `<pc>` cell in the **d**ebug cells view.
+-   `:omit   gas pc` - omit the contents of the `<gas>` and `<pc>` cells in the **t**erm view.
+-   `:unomit pc programBytes`  - unomit the contents of the `<pc>` and `<programBytes>` cells in the **t**erm view.
+
+Example
+-------
+
+**NOTE**: This example is out-of-date for this fork of KLab.
+
+To see how klab is used, we can explore the project in `examples/SafeAdd`:
+
+```sh
+cd examples/SafeAdd/
+```
+
+### Specification
+
+The file `config.json` tells klab where to look for both the specification and the implementation of our contract. In this case, our specification lives in `src/`, and our implementation lives in `dapp/`.
+
+Note that this example includes `dapp/out/SafeAdd.sol.json` compiled from the solidity source. With [solc](https://solidity.readthedocs.io/en/latest/installing-solidity.html) installed, you can compile it yourself:
+
+```sh
+solc --combined-json=abi,bin,bin-runtime,srcmap,srcmap-runtime,ast dapp/src/SafeAdd.sol > dapp/out/SafeAdd.sol.json
+```
+
+### Proof
+
+Our goal is to prove that our implementation satisfies our specification. To do so, we'll start by building a set of K modules from our spec:
+
+```sh
+klab build
+```
+
+This will generate success and failure reachability rules for each `act` of our specification. We can find the results in the `out/specs` directory.
+
+Now we're ready to prove each case, for example:
+
+```sh
+klab prove --dump SafeAdd_add_fail
+```
+
+The `--dump` flag outputs a log to `out/data/<hash>.log`, which will be needed later for interactive debugging. We can also do `klab prove-all` to prove all outstanding claims.
+
+Once the proof is complete, we can explore the generated symbolic execution trace using:
+
+```sh
+klab debug <hash>
 ```
 
 Troubleshooting
