@@ -1,8 +1,43 @@
 KLab
 ====
+
 **NOTE:** This software is still in the early stages of development. If you are confused, find some bugs, or just want some help, please file an issue or come talk to us at <https://dapphub.chat/channel/k-framework>.
+This is a **fork** of the Klab project at <https://github.com/dapphub/klab>, with many features removed and some features added.
+Make sure you're aware when asking for support whether it's for the original KLab features or the additional ones here.
 
 Klab is a tool for generating and debugging proofs in the [K Framework](http://www.kframework.org/index.php/Main_Page), tailored for the formal verification of ethereum smart contracts. It includes a succinct [specification language](acts.md) for expressing the behavior of ethereum contracts, and an interactive debugger.
+
+Differences from Upstream
+-------------------------
+
+The upstream repository is here <https://github.com/dapphub/klab>.
+There are several differences:
+
+-   This repository no longer pins the specific version of KEVM as a submodule.
+    It assumes that instead your proof repository pins the KEVM version itself.
+
+-   All of the CI related functionality is pulled out, this version of KLab is only focused on:
+    -   Converting ACT specifications into K specifications.
+    -   Extracting gas expressions from KEVM proof executions.
+    -   Generating a Makefile which expresses the proof dependency graph.
+    -   Displaying run proofs using the KLab debugger.
+
+-   KLab no longer explicitly handles running all the proofs itself.
+    Instead, you use `klab make` to generate a Makefile which expresses the proof dependency graph.
+    Then you can include the generated Makefile into your own build system which handles providing top-level targets for running all the proofs.
+
+-   KLab no longer builds all the specifications it can at once with `klab build`.
+    Instead you use `klab build-spec SPEC_NAME` to build a specific specification, which makes it a bit more modular.
+
+-   KLab no longer ships with a default body of lemmas, smt prelude, or concrete rules list, it's up to the user to supply all needed lemmas.
+    When you call `klab prove ...`, you can pass any additional arguments you would like to go to the K prover, allowing you to bring back these options if you need them.
+
+-   The generation of specifications has changed in several ways:
+    -   It now takes advantage of KEVM's (Infinite Gas Abstraction)[https://github.com/kframework/evm-semantics/blob/master/tests/specs/infinite-gas.k] rather than selecting a "high-enough" gas value.
+    -   The generated specifications have been tweaked to be valid for both the Java and Haskell backends of K.
+    -   The generated specifications now use the "abstract-pre concrete-post" abstraction for specifying storage:
+        -   The pre-state is specified fully abstractly as a variable `ACCT_STORAGE`, with side-conditions that specify certain values like `requires #lookup(ACCT_STORAGE, KEY1) ==Int VALUE1`.
+        -   The post-state is specified as the sequence of writes directly on the pre-storage, like `ACCT_STORAGE [ KEY1 <- VALUE1 ]`.
 
 Installation
 ------------
