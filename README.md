@@ -29,8 +29,13 @@ There are several differences:
 -   KLab no longer builds all the specifications it can at once with `klab build`.
     Instead you use `klab build-spec SPEC_NAME` to build a specific specification, which makes it a bit more modular.
 
+-   KLab no longer handles the simplification of gas expressions, and expects you to provide a script that will do so.
+    `klab get-gas` will now extract an expression that looks like `(#gas(G1) #And C1) #Or (#gas(G2) #And C2) ...` for each branch in the rough-proof execution.
+    It's up to the dependent repository to provide a script which simplifies this expression for inclusion in the pass proofs.
+
 -   KLab no longer ships with a default body of lemmas, smt prelude, or concrete rules list, it's up to the user to supply all needed lemmas.
     When you call `klab prove ...`, you can pass any additional arguments you would like to go to the K prover, allowing you to bring back these options if you need them.
+    `klab prove` also no longer handles timing out for you, if you want to timeout proofs you must provide that functionality externally.
 
 -   The generation of specifications has changed in several ways:
     -   It now takes advantage of KEVM's (Infinite Gas Abstraction)[https://github.com/kframework/evm-semantics/blob/master/tests/specs/infinite-gas.k] rather than selecting a "high-enough" gas value.
