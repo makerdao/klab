@@ -44,70 +44,26 @@ There are several differences:
         -   The pre-state is specified fully abstractly as a variable `ACCT_STORAGE`, with side-conditions that specify certain values like `requires #lookup(ACCT_STORAGE, KEY1) ==Int VALUE1`.
         -   The post-state is specified as the sequence of writes directly on the pre-storage, like `ACCT_STORAGE [ KEY1 <- VALUE1 ]`.
 
-Installation
-------------
+Usage
+-----
 
-### Dependencies
+### Building KLab
 
-[See dependency installation instructions here](https://github.com/kframework/evm-semantics#system-dependencies)
+To build KLab, simply call `npm install` in this repository.
+Make sure that the path `bin/` inside this repository is on your `PATH` to be able to execute the `klab ...` commands.
+Set the `KLAB_OUT` directory to where you would like all proof artifacts to be stored (this directory will typically become very large, on the order of 10s of GB).
 
-This project uses the `GNU` version of `getopt` and `time`. `OSX` and `gnu` have a complicated relationship but you can run:
-```sh
-export PATH=/usr/local/opt/gnu-getopt/bin:/usr/local/opt/gnu-time/libexec/gnubin:/usr/local/opt/coreutils/libexec/gnubin:$PATH
-```
-to make them get along.
+### Setting up KEVM
 
-### Building
-
-Clone the repo and install the latest stable version `v0.4.0` with
-```sh
-git clone --branch v0.4.0 https://github.com/dapphub/klab.git
-cd klab
-make deps
-```
-
-**OPTIONAL**: `klab` has some optional Haskell components, for which the recommended installation method is [nix](https://nixos.org/nix/). If you have `nix`, you can install the Haskell components with
-
-```sh
-make deps-haskell
-```
-
-### Environment Setup
-
-To make klab available from the terminal, you can either just export the path to the `klab` executable in `bin/`, or use:
-
-```sh
-make link
-```
-
-This installs symlinks globally at `/usr/local/bin` and `/usr/local/libexec` (will require `sudo` on Linux machines). You can also specify a custom directory for installation by doing:
-
-```sh
-PREFIX=/path/to/custom/prefix make link
-```
-The file `env` will setup the environment for you if sourced from the root directory of the repo.
-
-```sh
-source ./env
-```
-
-It sets three environment variables:
-
--   `PATH`: include the `klab` executable.
--   `KLAB_EVMS_PATH`: the EVM semantics to use.
-
-**OPTIONAL**: If you want to use a different version of K than what the KEVM ships with, you can set:
-
--   `KLAB_K_PATH`: override implementation of K.
-
-**OPTIONAL**: You might also want to add the K tool binaries in `evm-semantics/.build/k/k-distribution/bin` to your `$PATH`, if you didn't already have K installed.
-
-**OPTIONAL**: You can also use `nix-shell` for a more deterministic environment experience. If you have `nix` installed, run `nix-shell` in this repo to start a deterministic shell environment.
+KLab no longer handles setting up KEVM for you.
+Follow the [Instructions for KEVM](https://github.com/kframework/evm-semantics) to setup KEVM, in particular you need to build the Java backend (`make build-java`).
+Make sure that you setup the environment variable `KLAB_EVMS_PATH` to point to the absolute path of the KEVM repository root.
 
 Usage
 -----
 
 To see how klab is used, we can explore the project in `examples/SafeAdd`:
+
 ```sh
 cd examples/SafeAdd/
 ```
@@ -117,6 +73,7 @@ cd examples/SafeAdd/
 The file `config.json` tells klab where to look for both the specification and the implementation of our contract. In this case, our specification lives in `src/`, and our implementation lives in `dapp/`.
 
 Note that this example includes `dapp/out/SafeAdd.sol.json` compiled from the solidity source. With [solc](https://solidity.readthedocs.io/en/latest/installing-solidity.html) installed, you can compile it yourself:
+
 ```sh
 solc --combined-json=abi,bin,bin-runtime,srcmap,srcmap-runtime,ast dapp/src/SafeAdd.sol > dapp/out/SafeAdd.sol.json
 ```
@@ -124,27 +81,26 @@ solc --combined-json=abi,bin,bin-runtime,srcmap,srcmap-runtime,ast dapp/src/Safe
 ### Proof
 
 Our goal is to prove that our implementation satisfies our specification. To do so, we'll start by building a set of K modules from our spec:
+
 ```sh
 klab build
 ```
+
 This will generate success and failure reachability rules for each `act` of our specification. We can find the results in the `out/specs` directory.
 
 Now we're ready to prove each case, for example:
+
 ```sh
 klab prove --dump SafeAdd_add_fail
 ```
+
 The `--dump` flag outputs a log to `out/data/<hash>.log`, which will be needed later for interactive debugging. We can also do `klab prove-all` to prove all outstanding claims.
 
 Once the proof is complete, we can explore the generated symbolic execution trace using:
+
 ```sh
 klab debug <hash>
 ```
-
-### Embedded rules
-
-klab comes with a set of pre-defined K rewrite rules, additional to the ones
-defined in [evm-semantics](https://github.com/kframework/evm-semantics). They
-are located in `resources/rules.k.tmpl`.
 
 ### Key Bindings
 
@@ -188,20 +144,10 @@ Remember, you must turn on the **d**ebug cells view to see these (above).
 
 -   `klab build` - builds a set of K reachability claims in `out/specs` based on the spec, lemmas and source code as specified in the projects `config.json`.
 -   `klab prove <hash> [--dump]` - executes a K reachability claim specified as a hash to the K prover. If the `--dump` flag is present, the proof can be explored using `klab debug`.
--   `klab prove-all` - builds and executes all proof objects in the project directory.
 -   `klab debug <hash>` - opens up the cli proof explorer of a particular proof execution. See key bindings above.
--   `klab focus <hash>` - focus on a hash, allowing you to leave out it as an argument to other commands.
 -   `klab hash` - prints the hash of the focused proof
 -   `klab get-gas <hash>` - Traverses the execution trace of a proof object to fetch its gas usage, put in `out/gas/<hash>gas.k`.
--   `klab solve-gas <hash>` - Constructs the gas condition necessary for an execution to succeed.
--   `klab evm <hash>` - Shows opcodes and source code side-by-side (useful for extracting pc values).
--   `klab status <hash>` - Shows whether a proof has been run, and whether it was accepted or rejected.
--   `klab status-js <hash>` - Shows the behaviour tree for an executed proof.
--   `klab fetch <url>` - Fetches the execution trace of a proof object at the url, preparing it for local debugging.
--   `klab compress <hash>` - compresses an execution trace so you can share it with a friend (or enemy).
--   `klab storage <contractName>` - Guesses what the storage layout of a given contract is
--   `klab report` - Generates a html report of the current project state in `out/report/index.html`.
--   `klab help` - Generates this view
+-   `klab make` - generate a Makefile-style dependency graph between all the proofs in your ACT specification.
 
 ### Configuration
 
@@ -243,48 +189,6 @@ Here's an example:
   "host": "127.0.0.1:8080"
 }
 ```
-
-#### Limits
-
-##### Time
-
-By default, `klab-prove` sets a timeout of 1 day. This can be changed by passing
-the `--timeout` flag a value of the format `[0-9]+[dhms]`.
-
-`klab-prove-all` defaults to a per-proof timeout of `200m`. This can be changed
-by setting `timeouts` to a different value in `config.json`, as shown above.
-
-##### Memory
-
-By default, both `klab-prove` and `klab-prove-all` run the JVM with a maximum
-heap size of 10GB.
-
-This can be changed by setting the `K_OPTS` environment variable to something
-like `--Xmx4G`. Refer to the [JVM
-docs](https://docs.oracle.com/cd/E21764_01/web.1111/e13814/jvm_tuning.htm#PERFM164)
-for more information.
-
-`klab-prove-all` also reads the `config.json` file, and the maximum heap size
-can be changed with the `memory` key, as shown above.
-
-##### Gas
-
-In rough specs, the amount of gas available defaults to 3,000,000. This can be
-changed using the [`gas` header](https://github.com/dapphub/klab/blob/master/acts.md/#gas).
-
-Once a `pass_rough` spec has been proven, the gas used for each execution path is combined into a single expression, which is the upper gas bound for the stronger `pass` spec.
-
-### Zsh completions
-
-There are automatic tab completions for `zsh` that can be installed by adding the following to your `.zshrc`:
-
-```sh
-# completions for klab
-fpath=(~/dapphub/klab/resources/zsh $fpath)
-autoload -U compinit
-compinit
-```
-
 
 Troubleshooting
 ---------------
@@ -339,7 +243,9 @@ make clean && make deps
 
 This will remove and recompile the KEVM semantics.
 
-# License
+License
+-------
+
 All contributions to this repository are licensed under AGPL-3.0. Authors:
 
 * Denis Erfurt
