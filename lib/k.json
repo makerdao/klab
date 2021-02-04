@@ -31,7 +31,7 @@
         "substate": {
           "selfDestruct": "VSelfDestruct",
           "log": "_ => ?_",
-          "refund": "_ => ?_"
+          "refund": "Vrefund => ?_"
         },
         "gasPrice": "_",
         "origin": "ORIGIN_ID",

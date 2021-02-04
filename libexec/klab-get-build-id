@@ -1,6 +1,0 @@
-#!/usr/bin/env node
-const {
-  getBuildId
-} = require("../lib/util.js");
-
-process.stdout.write(getBuildId());

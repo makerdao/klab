@@ -19,15 +19,8 @@ default: deps
 clean:
 	rm -fdR out/* evm-semantics
 	git submodule sync --recursive
-	git submodule update --init --recursive evm-semantics
 
-deps: deps-kevm deps-npm
-
-deps-kevm:
-	git submodule update --init --recursive evm-semantics
-	cd evm-semantics \
-		&& make k-deps tangle-deps -B \
-		&& make build-java -B
+deps: deps-npm
 
 deps-npm:
 	npm install
