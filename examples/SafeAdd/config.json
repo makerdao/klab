@@ -1,14 +1,49 @@
 {
   "src": {
     "specification": "src/specification.act.md",
-    "smt_prelude": "src/prelude.smt2.md",
-    "rules": [
-      "src/lemmas.k.md"
+    "lemmas": "src/verification.k",
+    "requires": [
+      {
+        "file": "tests/specs/mcd/verification.k",
+        "module": "VERIFICATION"
+      }
+    ],
+    "concrete-rules": [
+      "EDSL.#ceil32",
+      "EDSL.keccakIntList",
+      "EVM.allBut64th.pos",
+      "EVM.Cextra",
+      "EVM.Cmem",
+      "EVM.Cnew",
+      "EVM.Csstore.new",
+      "EVM.Csstore.old",
+      "EVM.Cxfer.none",
+      "EVM.Cxfer.some",
+      "EVM.#memoryUsageUpdate.some",
+      "EVM.Rsstore.new",
+      "EVM.Rsstore.old",
+      "EVM-TYPES.#asByteStack",
+      "EVM-TYPES.#asByteStackAux.recursive",
+      "EVM-TYPES.#asWord.recursive",
+      "EVM-TYPES.ByteArray.range",
+      "EVM-TYPES.mapWriteBytes.recursive",
+      "EVM-TYPES.#padToWidth",
+      "EVM-TYPES.powmod.nonzero",
+      "EVM-TYPES.powmod.zero",
+      "EVM-TYPES.#range",
+      "EVM-TYPES.#rangeAux.rec",
+      "EVM-TYPES.signextend.invalid",
+      "EVM-TYPES.signextend.negative",
+      "EVM-TYPES.signextend.positive",
+      "SERIALIZATION.keccak",
+      "SERIALIZATION.#newAddr",
+      "SERIALIZATION.#newAddrCreate2"
     ]
   },
   "implementations": {
     "SafeAdd": {
-      "src": "src/SafeAdd.sol"
+      "src": "src/SafeAdd.sol",
+      "bin_runtime": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c8063771602f714602d575b600080fd5b606060048036036040811015604157600080fd5b8101908080359060200190929190803590602001909291905050506076565b6040518082815260200191505060405180910390f35b6000828284019150811015608957600080fd5b9291505056fea265627a7a72305820e2769929e2117382e450bd002f4a46ad451eba1612fd4de3d06c17464d824fda64736f6c63430005090032"
     }
   },
   "dapp_root": "dapp"
