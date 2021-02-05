@@ -87,8 +87,11 @@ output_makefile = []
 fail_rough = []
 pass_rough = []
 pass = []
-output_makefile.push('KLAB_OUT := ' + KLAB_OUT)
+output_makefile.push('KLAB_OUT ?= ' + KLAB_OUT)
 output_makefile.push('export KLAB_OUT')
+output_makefile.push('')
+output_makefile.push('PYTHONPATH ?= $(KLAB_EVMS_PATH)/deps/k/k-distribution/target/release/k/lib/kframework')
+output_makefile.push('export PYTHONPATH')
 output_makefile.push('')
 output_makefile.push('KLAB             := klab')
 output_makefile.push('HASH             := klab hash')
@@ -102,7 +105,7 @@ output_makefile.push('CHECK_SUB_LEMMAS := $(KLAB) check-sublemmas')
 output_makefile.push('')
 output_makefile.push('CONCRETE_RULES := "' + config_json['src']['concrete-rules'].join(',').replace(/#/g, '\\#') + '"')
 output_makefile.push('PROVE_ARGS     := --concrete-rules $(CONCRETE_RULES)')
-output_makefile.push('SPEC_SRCS      := $(KLAB_OUT)/specs/verification.k ' + config_json['src']['specification'])
+output_makefile.push('SPEC_SRCS      := $(KLAB_OUT)/specs/verification.k $(KLAB_OUT)/dir.timestamp ' + config_json['src']['specification'])
 output_makefile.push('')
 for (var dep_name in dependencies) {
   let isRough                = dep_name.endsWith('_rough')
@@ -189,7 +192,16 @@ output_makefile.push('            $(patsubst %, $(KLAB_OUT)/gas/%,         $(all
 output_makefile.push('            $(patsubst %, $(KLAB_OUT)/gas/%.raw,     $(all_specs))'   )
 output_makefile.push('')
 
-output_makefile.push('$(KLAB_OUT)/specs/verification.k: ' + config_json['src']['lemmas'])
+output_makefile.push('')
+output_makefile.push('$(KLAB_OUT)/dir.timestamp:')
+for (i in dir_list) {
+  dir_name = dir_list[i]
+  output_makefile.push('\tmkdir -p ' + dir_name)
+}
+output_makefile.push('\ttouch $@')
+
+output_makefile.push('')
+output_makefile.push('$(KLAB_OUT)/specs/verification.k: ' + config_json['src']['lemmas'] + ' $(KLAB_OUT)/specs/bin_runtime.k')
 output_makefile.push('\techo > $@')
 for (i in config_json['src']['requires']) {
   req_file = config_json['src']['requires'][i]['file']
@@ -202,8 +214,18 @@ for (i in config_json['src']['requires']) {
   output_makefile.push('\techo \'    imports ' + req_import + '\' >> $@')
 }
 output_makefile.push('\techo >> $@')
-output_makefile.push('\tcat $< >> $@')
+output_makefile.push('\tcat $^ >> $@')
 output_makefile.push('\techo >> $@')
 output_makefile.push('\techo \'endmodule\' >> $@')
+
+output_makefile.push('')
+output_makefile.push('$(KLAB_OUT)/specs/bin_runtime.k: $(KLAB_OUT)/dir.timestamp')
+output_makefile.push('\techo > $@')
+for (i in config_json['implementations']) {
+  bin_runtime_name = i + '_bin_runtime'
+  output_makefile.push('\techo >> $@')
+  output_makefile.push('\techo \'    syntax ByteArray ::= "' + bin_runtime_name + '"\' >> $@')
+  output_makefile.push('\techo \'    rule ' + bin_runtime_name + ' => #parseByteStack("' + config_json['implementations'][i]['bin_runtime'] + '") [macro]\' >> $@')
+}
 
 console.log(output_makefile.join('\n'))
