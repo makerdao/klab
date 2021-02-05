@@ -4,6 +4,7 @@
 /examples/*/behaviour.json
 /examples/*/out/
 /examples/*/out/*package-lock.json
+/examples/*/Makefile
 /result
 /haskell/cabal.*
 /haskell/dist*
