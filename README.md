@@ -150,8 +150,6 @@ Remember, you must turn on the **d**ebug cells view to see these (above).
 Example
 -------
 
-**NOTE**: This example is out-of-date for this fork of KLab.
-
 To see how klab is used, we can explore the project in `examples/SafeAdd`:
 
 ```sh
@@ -160,9 +158,11 @@ cd examples/SafeAdd/
 
 ### Specification
 
-The file `config.json` tells klab where to look for both the specification and the implementation of our contract. In this case, our specification lives in `src/`, and our implementation lives in `dapp/`.
+The file `config.json` tells klab where to look for both the specification and the implementation of our contract.
+In this case, our specification lives in `src/`, and our implementation lives in `dapp/`.
 
-Note that this example includes `dapp/out/SafeAdd.sol.json` compiled from the solidity source. With [solc](https://solidity.readthedocs.io/en/latest/installing-solidity.html) installed, you can compile it yourself:
+Note that this example includes `dapp/out/SafeAdd.sol.json` compiled from the solidity source.
+With [solc](https://solidity.readthedocs.io/en/latest/installing-solidity.html) installed, you can compile it yourself:
 
 ```sh
 solc --combined-json=abi,bin,bin-runtime,srcmap,srcmap-runtime,ast dapp/src/SafeAdd.sol > dapp/out/SafeAdd.sol.json
@@ -170,26 +170,27 @@ solc --combined-json=abi,bin,bin-runtime,srcmap,srcmap-runtime,ast dapp/src/Safe
 
 ### Proof
 
-Our goal is to prove that our implementation satisfies our specification. To do so, we'll start by building a set of K modules from our spec:
+Our goal is to prove that our implementation satisfies our specification.
+To do so, we'll start by building the `Makefile` associated with this proof-suite:
 
 ```sh
-klab build
+klab make > Makefile
 ```
 
-This will generate success and failure reachability rules for each `act` of our specification. We can find the results in the `out/specs` directory.
+This produces a `Makefile` which allows you to run all the proofs associated with this ACT specification.
 
-Now we're ready to prove each case, for example:
+With this `Makefile`, we can now call:
 
 ```sh
-klab prove --dump SafeAdd_add_fail
+make prove -j3
 ```
 
-The `--dump` flag outputs a log to `out/data/<hash>.log`, which will be needed later for interactive debugging. We can also do `klab prove-all` to prove all outstanding claims.
+which will run all the associated proofs with this contract.
 
-Once the proof is complete, we can explore the generated symbolic execution trace using:
+You can debug a given `rough` proof using the following `Makefile` targets:
 
 ```sh
-klab debug <hash>
+make SafeAdd_add_pass_rough.klab-view
 ```
 
 Troubleshooting
