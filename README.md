@@ -192,6 +192,11 @@ You can debug a given `rough` proof using the following `Makefile` targets:
 ```sh
 make SafeAdd_add_pass_rough.klab-view
 ```
+**note**: Currently, exhaustiveness specs will fail. This will be resolved shortly. You can pass the `-k` flag to the `prove` command to tell make to continue with proofs in the event of a failure. This is recommended until this issue is resolved in the near future:
+
+```sh
+make prove -j3 -k
+```
 
 Troubleshooting
 ---------------
