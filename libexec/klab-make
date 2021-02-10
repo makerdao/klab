@@ -204,13 +204,13 @@ output_makefile.push('')
 output_makefile.push('$(KLAB_OUT)/specs/verification.k: ' + config_json['src']['lemmas'] + ' $(KLAB_OUT)/specs/bin_runtime.k')
 output_makefile.push('\techo > $@')
 for (i in config_json['src']['requires']) {
-  req_file = config_json['src']['requires'][i]['file']
+  req_file = config_json['src']['requires'][i]
   output_makefile.push('\techo \'requires "' + req_file + '"\' >> $@')
 }
 output_makefile.push('\techo >> $@')
 output_makefile.push('\techo \'module KLAB-VERIFICATION\' >> $@')
-for (i in config_json['src']['requires']) {
-  req_import = config_json['src']['requires'][i]['module']
+for (i in config_json['src']['imports']) {
+  req_import = config_json['src']['imports'][i]
   output_makefile.push('\techo \'    imports ' + req_import + '\' >> $@')
 }
 output_makefile.push('\techo >> $@')
