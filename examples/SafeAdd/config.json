@@ -7,7 +7,7 @@
       "tests/specs/mcd/verification.k"
     ],
     "imports": [
-      "VERIFICATION",
+      "LEMMAS-MCD"
     ],
     "concrete-rules": [
       "EDSL.#ceil32",
