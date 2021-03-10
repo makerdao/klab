@@ -56,8 +56,9 @@ Set the `KLAB_OUT` directory to where you would like all proof artifacts to be s
 ### Setting up KEVM
 
 KLab no longer handles setting up KEVM for you.
-Follow the [Instructions for KEVM](https://github.com/kframework/evm-semantics) to setup KEVM, in particular you need to build the Java backend (`make build-java`).
-Make sure that you setup the environment variable `KLAB_EVMS_PATH` to point to the absolute path of the KEVM repository root.
+Install KEVM following the [release instructions](https://github.com/kframework/evm-semantics/releases).
+
+If you build KEVM from source, make sure you set the environment variable `KLAB_EVMS_PATH` to point to the root of the KEVM repository.
 
 ### Available klab Commands
 
