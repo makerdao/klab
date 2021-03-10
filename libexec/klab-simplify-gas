@@ -22,7 +22,17 @@ def debug(msg):
         print(msg)
         sys.stdout.flush()
 
-definition = pyk.readKastTerm(os.environ['KLAB_EVMS_PATH'] + '/.build/defn/java/driver-kompiled/compiled.json')
+def fatal(msg):
+    print(msg)
+    sys.stdout.flush()
+    sys.exit(1)
+
+if os.path.isfile(os.environ['KLAB_EVMS_PATH'] + '/.build/defn/java/driver-kompiled/compiled.json'):
+    definition = pyk.readKastTerm(os.environ['KLAB_EVMS_PATH'] + '/.build/defn/java/driver-kompiled/compiled.json')
+elif os.path.isfile('/usr/lib/kevm/java/driver-kompiled/compiled.json'):
+    definition = pyk.readKastTerm('/usr/lib/kevm/java/driver-kompiled/compiled.json')
+else:
+    fatal('Cannot find "compiled.json"')
 
 ite_label     = '#if_#then_#else_#fi_K-EQUAL-SYNTAX'
 inf_gas_label = 'infGas'
