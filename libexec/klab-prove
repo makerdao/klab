@@ -31,6 +31,7 @@ if [ -z "$KLAB_EVMS_PATH" ]; then
     exit 1
 fi
 echo "Using evm-semantics from $KLAB_EVMS_PATH"
+export PATH=$KLAB_EVMS_PATH/.build/usr/bin:$PATH
 
 if [ -f "$KLAB_OUT/meta/name/$spec_name" ]; then
   spec_hash=$(cat "$KLAB_OUT/meta/name/$spec_name")
