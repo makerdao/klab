@@ -4,9 +4,20 @@ import json
 import resource
 import sys
 import os
-import pyk
 
+if os.path.isfile(os.environ['KLAB_EVMS_PATH'] + '/.build/usr/lib/kevm/java/driver-kompiled/compiled.json'):
+    compiled_file = os.environ['KLAB_EVMS_PATH'] + '/.build/usr/lib/kevm/java/driver-kompiled/compiled.json'
+    sys.path.append(os.environ['KLAB_EVMS_PATH'] + '/.build/usr/lib/kevm/kframework/lib/kframework')
+elif os.path.isfile('/usr/lib/kevm/java/driver-kompiled/compiled.json'):
+    compiled_file = '/usr/lib/kevm/java/driver-kompiled/compiled.json'
+    sys.path.append('/usr/lib/kevm/kframework/lib/kframework')
+else:
+    fatal('Cannot find "compiled.json"')
+
+import pyk
 from pyk import KApply, KVariable, KToken
+
+definition = pyk.readKastTerm(compiled_file)
 
 sys.setrecursionlimit(1500000000)
 resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
@@ -22,7 +33,10 @@ def debug(msg):
         print(msg)
         sys.stdout.flush()
 
-definition = pyk.readKastTerm(os.environ['KLAB_EVMS_PATH'] + '/.build/defn/java/driver-kompiled/compiled.json')
+def fatal(msg):
+    print(msg)
+    sys.stdout.flush()
+    sys.exit(1)
 
 ite_label     = '#if_#then_#else_#fi_K-EQUAL-SYNTAX'
 inf_gas_label = 'infGas'

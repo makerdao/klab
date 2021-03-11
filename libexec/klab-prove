@@ -31,6 +31,7 @@ if [ -z "$KLAB_EVMS_PATH" ]; then
     exit 1
 fi
 echo "Using evm-semantics from $KLAB_EVMS_PATH"
+export PATH=$KLAB_EVMS_PATH/.build/usr/bin:$PATH
 
 if [ -f "$KLAB_OUT/meta/name/$spec_name" ]; then
   spec_hash=$(cat "$KLAB_OUT/meta/name/$spec_name")
@@ -50,10 +51,14 @@ fi
 
 target_spec=${target_spec:-"$KLAB_OUT/specs/${spec_hash}.k"}
 
-K_FLAGS=()
+K_FLAGS=(--z3-impl-timeout 300 --no-exc-wrap)
+K_FLAGS+=(--cache-func-optimized --format-failures)
+K_FLAGS+=(--boundary-cells k,pc)
+K_FLAGS+=(--z3-tactic "(or-else (using-params smt :random-seed 3) (using-params smt :random-seed 2) (using-params smt :random-seed 1))")
+
+prove_mode=prove
 if $dump; then
-  z3=",RULEATTEMPT,SRULEATTEMPT,IMPLICATION,Z3QUERY,Z3RESULT"
-  K_FLAGS+=(--state-log --state-log-path "$KLAB_OUT/data" --state-log-id "$spec_hash" --state-log-events "OPEN,REACHINIT,REACHTARGET,REACHPROVED,RULE,SRULE,NODE,CLOSE")
+  prove_mode=klab-prove
   dump_notice="(with ${yellow}state logging${reset})"
 fi
 
@@ -64,28 +69,8 @@ fi
 info="$(basename "$target_spec") [$spec_name] $dump_notice"
 mkdir -p "$KLAB_OUT/started" && echo "$result" > "$KLAB_OUT/started/$spec_hash"
 echo "${blue}Proof ${bold}STARTING${reset}: $info"
-set +e
-trap 'echo "Trapped SIGTERM in klab-prove" && kill $kprove_child' TERM
-trap 'echo "Trapped SIGINT in klab-prove"  && kill $kprove_child' INT
-"$KLAB_EVMS_PATH/deps/k/k-distribution/target/release/k/bin/kprove" \
-  "${K_FLAGS[@]}" \
-  --directory "$KLAB_EVMS_PATH/.build/defn/java/" \
-  --def-module KLAB-VERIFICATION \
-  --output-omit "<jumpDests> <program> <code> <previousGas> <touchedAccounts> <interimStates> <callStack> <callData> <block> <txOrder> <txPending> <messages> #mkCall________EVM #callWithCode_________EVM #create_____EVM #mkCreate_____EVM #newAddrCreate2 #finishCodeDeposit___EVM" \
-  --output-flatten "_Map_ #And" \
-  --z3-impl-timeout 300 --no-exc-wrap \
-  --cache-func-optimized --format-failures \
-  --no-alpha-renaming \
-  --no-sort-collections \
-  --output json \
-  --boundary-cells k,pc \
-  --z3-tactic "(or-else (using-params smt :random-seed 3) (using-params smt :random-seed 2) (using-params smt :random-seed 1))" \
-  "$@" \
-  "$target_spec" >"$STDOUT" 2>"$STDERR" & kprove_child=$!
-wait "$kprove_child"
-result=$?
-unset kprove_child
-set -e
+result=0
+kevm $prove_mode "$target_spec" KLAB-VERIFICATION "${K_FLAGS[@]}" "$@" >"$STDOUT" 2>"$STDERR" || result="$?"
 
 if [ $result -eq 0 ]; then
   mkdir -p "$KLAB_OUT/accept" && echo "$result" > "$KLAB_OUT/accept/$spec_hash"

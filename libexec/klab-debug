@@ -132,7 +132,7 @@ if(targett) {
 constraint_blobs.concat(key_terms).concat(targett.split("_")[0])
   .forEach((blobid, i) => {
     console.log(i);
-    const json = JSON.parse(read(path.join(KLAB_WD_PATH, `${proofid}_blobs`, blobid + ".json"))).term;
+    const json = JSON.parse(read(path.join(KLAB_WD_PATH, `${proofid}.k_blobs`, blobid + ".json"))).term;
     blobs_data[blobid] = json;
   })
 }
@@ -141,15 +141,15 @@ console.log("reading rules: " + rule_blobs.length);
 const rules_data = rule_blobs
     .reduce((a, ruleid) => {
       if(a && !a[ruleid]) {
-        try { a[ruleid] = JSON.parse(read(path.join(KLAB_WD_PATH, `${proofid}_blobs`, ruleid + ".json"))) }
-        catch(e) {console.log('bad json: ' + path.join(KLAB_WD_PATH, `${proofid}_blobs`, ruleid + ".json"))}
+        try { a[ruleid] = JSON.parse(read(path.join(KLAB_WD_PATH, `${proofid}.k_blobs`, ruleid + ".json"))) }
+        catch(e) {console.log('bad json: ' + path.join(KLAB_WD_PATH, `${proofid}.k_blobs`, ruleid + ".json"))}
       }
       return a;
     }, {})
 
   //     .map(blobid => {
   //       let jsonn;
-  //       try { jsonn = JSON.parse(read(path.join(KLAB_WD_PATH, `${proofid}_blobs`, blobid + ".json")))       } catch(e) { console.log('bad json: ' + path.join(KLAB_WD_PATH, `${proofid}_blobs`, blobid + ".json"))}
+  //       try { jsonn = JSON.parse(read(path.join(KLAB_WD_PATH, `${proofid}.k_blobs`, blobid + ".json")))       } catch(e) { console.log('bad json: ' + path.join(KLAB_WD_PATH, `${proofid}.k_blobs`, blobid + ".json"))}
   //       return [blobid, jsonn]})
   // .reduce((a, [id, json]) => ({...a, [id]: json.term}), {})
 
