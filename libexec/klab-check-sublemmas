@@ -16,8 +16,8 @@ echo "$count_trusted_rules"
 [[ "$count_trusted_rules" != 0 ]] || exit 0
 
 find_rules() {
-    for rule in $(grep 'SRULE' out/data/$proof_hash.k.log | cut --delimiter=' ' --field=3 | cut --delimiter='_' --field=1); do
-        cat "out/data/${proof_hash}.k_blobs/$rule.json"                     \
+    for rule in $(grep 'SRULE' out/data/$proof_hash.k.k.log | cut --delimiter=' ' --field=3 | cut --delimiter='_' --field=1); do
+        cat "out/data/${proof_hash}.k.k_blobs/$rule.json"                     \
             | jq .term.att                                                  \
             | grep --only-matching "label($proof_hash_upper.[A-Za-z.]*)"    \
             | cut --delimiter='(' --field=2 | cut --delimiter=')' --field=1 \
