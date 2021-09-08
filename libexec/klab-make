@@ -88,28 +88,18 @@ output_makefile = []
 fail_rough = []
 pass_rough = []
 pass = []
-output_makefile.push('KLAB_OUT ?= ' + KLAB_OUT)
-output_makefile.push('export KLAB_OUT')
-output_makefile.push('')
-output_makefile.push('KLAB_EVMS_PATH ?= ' + KLAB_EVMS_PATH)
-output_makefile.push('export KLAB_EVMS_PATH')
-output_makefile.push('')
-output_makefile.push('PYTHONPATH ?= $(KLAB_EVMS_PATH)/.build/deps/k/k-distribution/target/release/k/lib/kframework:/usr/lib/kevm/kframework/lib/kframework')
-output_makefile.push('export PYTHONPATH')
-output_makefile.push('')
 output_makefile.push('KLAB             := klab')
 output_makefile.push('HASH             := klab hash')
-output_makefile.push('PROVE            := $(KLAB) prove')
+output_makefile.push('PROVE            := $(KLAB) prove --backend-dir $(KLAB_OUT)/specs')
 output_makefile.push('BUILD            := $(KLAB) build-spec')
 output_makefile.push('GET_GAS          := $(KLAB) get-gas')
 output_makefile.push('WRITE_GAS        := $(KLAB) simplify-gas')
 output_makefile.push('KLAB_MAKE        := $(KLAB) make')
-output_makefile.push('PROVE_DUMP       := $(KLAB) prove --dump')
+output_makefile.push('PROVE_DUMP       := $(KLAB) prove --dump --backend-dir $(KLAB_OUT)/specs')
 output_makefile.push('CHECK_SUB_LEMMAS := $(KLAB) check-sublemmas')
 output_makefile.push('')
 output_makefile.push('CONCRETE_RULES := "' + config_json['src']['concrete-rules'].join(',').replace(/#/g, '\\#') + '"')
-output_makefile.push('PROVE_ARGS     := --concrete-rules $(CONCRETE_RULES)')
-output_makefile.push('SPEC_SRCS      := $(KLAB_OUT)/specs/verification.k $(KLAB_OUT)/dir.timestamp ' + config_json['src']['specification'])
+output_makefile.push('SPEC_SRCS      := $(KLAB_OUT)/specs/verification-kompiled/timestamp $(KLAB_OUT)/dir.timestamp ' + config_json['src']['specification'])
 output_makefile.push('')
 for (var dep_name in dependencies) {
   let isRough                = dep_name.endsWith('_rough')
@@ -203,6 +193,15 @@ for (i in dir_list) {
   output_makefile.push('\tmkdir -p ' + dir_name)
 }
 output_makefile.push('\ttouch $@')
+
+output_makefile.push('')
+output_makefile.push('$(KLAB_OUT)/specs/verification-kompiled/timestamp: $(KLAB_OUT)/specs/verification.k')
+output_makefile.push('\t$(KEVM) kompile --backend $(K_BACKEND) $< \\')
+output_makefile.push('\t    --directory $(KLAB_OUT)/specs         \\')
+output_makefile.push('\t    --main-module KLAB-VERIFICATION       \\')
+output_makefile.push('\t    --syntax-module KLAB-VERIFICATION     \\')
+output_makefile.push('\t    --concrete-rules $(CONCRETE_RULES)    \\')
+output_makefile.push('\t    $(KOMPILE_OPTS)')
 
 output_makefile.push('')
 output_makefile.push('$(KLAB_OUT)/specs/verification.k: ' + config_json['src']['lemmas'] + ' $(KLAB_OUT)/specs/bin_runtime.k')
