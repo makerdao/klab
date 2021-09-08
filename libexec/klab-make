@@ -18,8 +18,7 @@ const {
 
 const __a2n = act => act.subject + "_" + act.name;
 
-const KLAB_OUT       = process.env.KLAB_OUT       || "out";
-const KLAB_EVMS_PATH = process.env.KLAB_EVMS_PATH || "/";
+const KLAB_OUT = process.env.KLAB_OUT || "out";
 
 const usage = `
 Usage:
@@ -93,7 +92,7 @@ output_makefile.push('HASH             := klab hash')
 output_makefile.push('PROVE            := $(KLAB) prove --backend-dir $(KLAB_OUT)/specs')
 output_makefile.push('BUILD            := $(KLAB) build-spec')
 output_makefile.push('GET_GAS          := $(KLAB) get-gas')
-output_makefile.push('WRITE_GAS        := $(KLAB) simplify-gas')
+output_makefile.push('WRITE_GAS        := $(KLAB) simplify-gas $(KLAB_OUT)/specs')
 output_makefile.push('KLAB_MAKE        := $(KLAB) make')
 output_makefile.push('PROVE_DUMP       := $(KLAB) prove --dump --backend-dir $(KLAB_OUT)/specs')
 output_makefile.push('CHECK_SUB_LEMMAS := $(KLAB) check-sublemmas')
@@ -207,7 +206,7 @@ output_makefile.push('')
 output_makefile.push('$(KLAB_OUT)/specs/verification.k: ' + config_json['src']['lemmas'] + ' $(KLAB_OUT)/specs/bin_runtime.k')
 output_makefile.push('\techo > $@')
 for (i in config_json['src']['requires']) {
-  req_file = config_json['src']['requires'][i].replace('{KLAB_EVMS_PATH}', KLAB_EVMS_PATH)
+  req_file = config_json['src']['requires'][i]
   output_makefile.push('\techo \'requires "' + req_file + '"\' >> $@')
 }
 output_makefile.push('\techo >> $@')
