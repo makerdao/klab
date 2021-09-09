@@ -26,7 +26,7 @@ const cmd = docopt(usage, {
 const kpath = cmd['<kpath>']
 const proofid = cmd['<hash>']
 
-log_path = path.join(KLAB_OUT, "data", proofid + ".k.k.log")
+log_path = path.join(KLAB_OUT, "data", proofid + ".k.log")
 if(!testPath(log_path)) {
   console.error("klab-get-x: no logfile for " + proofid + ", checked " + log_path);
   process.exit(1);
@@ -106,7 +106,7 @@ const minus = args => ({
 })
 
 
-const blob = blobid => JSON.parse(read(path.join(KLAB_WD_PATH, proofid + ".k.k_blobs", blobid + ".json")));
+const blob = blobid => JSON.parse(read(path.join(KLAB_WD_PATH, proofid + ".k_blobs", blobid + ".json")));
 
 
 const isMinus = (gasExpr) => gasExpr.label && gasExpr.label == '_-Int__INT-COMMON'

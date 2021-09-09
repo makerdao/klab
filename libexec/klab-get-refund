@@ -25,12 +25,12 @@ const cmd = docopt(usage, {
 });
 const proofid = cmd['<hash>']
 
-if(!testPath(path.join(KLAB_OUT, "data", proofid + ".k.k.log"))) {
+if(!testPath(path.join(KLAB_OUT, "data", proofid + ".k.log"))) {
   console.error("klab-get-refund: no logfile for " + proofid);
   process.exit(1);
 }
 
-const logs = read(path.join(KLAB_WD_PATH, proofid + ".k.k.log"))
+const logs = read(path.join(KLAB_WD_PATH, proofid + ".k.log"))
   .split("\n")
   .filter(l => !!l)
 

@@ -12,13 +12,15 @@ dump=false
 kdebug=false
 logs=false
 args=()
+backend_dir=
 while [[ "$#" -gt '0' ]]; do
     arg="$1"
     case "$arg" in
-        --dump|-d ) dump=true    ; shift ;;
-        --kdebug  ) kdebug=true  ; shift ;;
-        --logs    ) logs=true    ; shift ;;
-        *         ) break        ; shift ;;
+        --dump|-d     ) dump=true      ; shift   ;;
+        --kdebug      ) kdebug=true    ; shift   ;;
+        --logs        ) logs=true      ; shift   ;;
+        --backend-dir ) backend_dir=$2 ; shift 2 ;;
+        *             ) break          ; shift   ;;
     esac
 done
 spec_name="$1" ; shift
@@ -26,12 +28,10 @@ spec_name="$1" ; shift
 export KLAB_OUT=${KLAB_OUT:-out}
 export K_OPTS="${K_OPTS:--Xmx16G -Xss512m}"
 
-if [ -z "$KLAB_EVMS_PATH" ]; then
-    echo "KLAB_EVMS_PATH must be set and point to evm-semantics!"
+if ! which kevm; then
+    echo "kevm not found on PATH!"
     exit 1
 fi
-echo "Using evm-semantics from $KLAB_EVMS_PATH"
-export PATH=$KLAB_EVMS_PATH/.build/usr/bin:$PATH
 
 if [ -f "$KLAB_OUT/meta/name/$spec_name" ]; then
   spec_hash=$(cat "$KLAB_OUT/meta/name/$spec_name")
@@ -51,14 +51,15 @@ fi
 
 target_spec=${target_spec:-"$KLAB_OUT/specs/${spec_hash}.k"}
 
-K_FLAGS=(--z3-impl-timeout 300 --no-exc-wrap)
+K_FLAGS=(--provex)
+K_FLAGS+=(--z3-impl-timeout 300 --no-exc-wrap)
 K_FLAGS+=(--cache-func-optimized --format-failures)
 K_FLAGS+=(--boundary-cells k,pc)
 K_FLAGS+=(--z3-tactic "(or-else (using-params smt :random-seed 3) (using-params smt :random-seed 2) (using-params smt :random-seed 1))")
 
 prove_mode=prove
 if $dump; then
-  prove_mode=klab-prove
+  K_FLAGS+=(--debugger)
   dump_notice="(with ${yellow}state logging${reset})"
 fi
 
@@ -66,11 +67,13 @@ if $kdebug; then
   K_FLAGS+=(--debug --debug-z3)
 fi
 
+[[ ! -d ${backend_dir} ]] || K_FLAGS+=(--backend-dir ${backend_dir})
+
 info="$(basename "$target_spec") [$spec_name] $dump_notice"
 mkdir -p "$KLAB_OUT/started" && echo "$result" > "$KLAB_OUT/started/$spec_hash"
 echo "${blue}Proof ${bold}STARTING${reset}: $info"
 result=0
-kevm $prove_mode "$target_spec" KLAB-VERIFICATION "${K_FLAGS[@]}" "$@" >"$STDOUT" 2>"$STDERR" || result="$?"
+kevm prove "$target_spec" KLAB-VERIFICATION "${K_FLAGS[@]}" "$@" >"$STDOUT" 2>"$STDERR" || result="$?"
 
 if [ $result -eq 0 ]; then
   mkdir -p "$KLAB_OUT/accept" && echo "$result" > "$KLAB_OUT/accept/$spec_hash"
