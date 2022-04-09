@@ -20,7 +20,7 @@
     "keccak": "^1.4.0",
     "lodash": "^4.17.5",
     "marked": "^0.8.0",
-    "moment": "^2.22.2",
+    "moment": "^2.29.2",
     "xstream": "^11.3.0"
   },
   "devDependencies": {
